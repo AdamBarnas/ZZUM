@@ -9,6 +9,7 @@ Projekt obejmie wykonanie i oprogramowanie układu spełniających następujące
 		 - zmiana ilości kroków/mm
 		 - uruchom sekwencję testową/demonstracyjną
 		 - ustaw timeout wyłączania silnika w sekundach
+	 - Wysyłanie wiadomości zwrotnej (czy można wysłać kolejne polecenia lub BUSY)
  - Obsługę sterownika do silnika krokowego (np. DRV8825) w trybie STEP/DIR:
 	 - Ruch z określoną prędkością w danym kierunku
 	 - Stałe przyspieszenie ruchu do osiągnięcia zadanej prędkości (możliwe wprowadzenie prędkości początkowej bez wymaganego rozpędzania)
