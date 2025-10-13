@@ -4,6 +4,7 @@ Projekt obejmie wykonanie i oprogramowanie układu spełniających następujące
 	 - Obsługa podstawowych komend .gcode
 		 - G0 - ruchy transportowe
 		 - G1 - ruchy robocze
+		 - https://marlinfw.org/docs/gcode/G000-G001.html
 	 - Obsługa własnych komend:
 		 - zmiana ustawień mikrokroków
 		 - zmiana ilości kroków/mm
