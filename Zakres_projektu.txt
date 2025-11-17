@@ -1,0 +1,25 @@
+Projekt obejmie wykonanie i oprogramowanie układu spełniających następujące wymagania:
+ - Przyjmowanie i kolejkowanie komend otrzymanych za pomocą UART:
+	 - Baud rate >= 115200
+	 - Obsługa podstawowych komend .gcode
+		 - G0 - ruchy transportowe
+		 - G1 - ruchy robocze
+		 - https://marlinfw.org/docs/gcode/G000-G001.html
+	 - Obsługa własnych komend:
+		 - zmiana ustawień mikrokroków
+		 - zmiana ilości kroków/mm
+		 - uruchom sekwencję testową/demonstracyjną
+		 - ustaw timeout wyłączania silnika w sekundach
+	 - Wysyłanie wiadomości zwrotnej (czy można wysłać kolejne polecenia lub BUSY)
+ - Obsługę sterownika do silnika krokowego (np. DRV8825) w trybie STEP/DIR:
+	 - Ruch z określoną prędkością w danym kierunku
+	 - Stałe przyspieszenie ruchu do osiągnięcia zadanej prędkości (możliwe wprowadzenie prędkości początkowej bez wymaganego rozpędzania)
+	 - Stałe przyspieszenie przy docieraniu do pozycji końcowej
+	 - Zmiana liczby mikrokroków on demand
+ - Obsługa enkodera magnetycznego (np. AS5600):
+	 - Odczyt bieżącego kąta z częstotliwością przynajmniej 100Hz
+	 - Identyfikacja czujnika i kompensacja nieliniowości w jego charakterystyce
+	 - Zapis pozycji, prędkości i przyspieszenia silnika na podstawie pomiarów
+ - Specyficzne wymagania:
+	 - Możliwość wyłączenia silnika po wykonaniu ostatniej komendy z bufora i upłynięciu określonego czasu
+	 - Ponowne włączenie silnika gdy dostarczona będzie nowa komenda lub gdy enkoder wskaże zmianę pozycji
