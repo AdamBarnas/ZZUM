@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -46,8 +47,36 @@ TIM_HandleTypeDef htim1;
 
 UART_HandleTypeDef huart2;
 
+/* Definitions for defaultTask */
+osThreadId_t defaultTaskHandle;
+const osThreadAttr_t defaultTask_attributes = {
+  .name = "defaultTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for gcode_task */
+osThreadId_t gcode_taskHandle;
+const osThreadAttr_t gcode_task_attributes = {
+  .name = "gcode_task",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for encoder_task */
+osThreadId_t encoder_taskHandle;
+const osThreadAttr_t encoder_task_attributes = {
+  .name = "encoder_task",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for orzel_task */
+osThreadId_t orzel_taskHandle;
+const osThreadAttr_t orzel_task_attributes = {
+  .name = "orzel_task",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* USER CODE BEGIN PV */
-
+uint16_t raw;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -56,6 +85,11 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C3_Init(void);
 static void MX_TIM1_Init(void);
+void StartDefaultTask(void *argument);
+void start_gcode_task(void *argument);
+void start_encoder_task(void *argument);
+void start_orzel_task(void *argument);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -100,9 +134,55 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start(&htim1);
   /* USER CODE END 2 */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
+
+  /* Init scheduler */
+  osKernelInitialize();
+
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* creation of defaultTask */
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+
+  /* creation of gcode_task */
+  gcode_taskHandle = osThreadNew(start_gcode_task, NULL, &gcode_task_attributes);
+
+  /* creation of encoder_task */
+  encoder_taskHandle = osThreadNew(start_encoder_task, NULL, &encoder_task_attributes);
+
+  /* creation of orzel_task */
+  orzel_taskHandle = osThreadNew(start_orzel_task, NULL, &orzel_task_attributes);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
+
+  /* USER CODE BEGIN RTOS_EVENTS */
+  /* add events, ... */
+  /* USER CODE END RTOS_EVENTS */
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
   while (1)
   {
 	  for(int i=0; i < 32; i++){
@@ -110,6 +190,14 @@ int main(void)
 		  HAL_Delay(2);
 	  }
 	  HAL_Delay(20);
+  	  if (AS5600_ReadRaw12(&raw))
+  	  {
+  		  printf("%u\r\n", raw);  // wypisz samą wartość surową
+  	  }
+  	  else
+  	  {
+  		  printf("error\r\n");
+  	  }
 
     /* USER CODE END WHILE */
 
@@ -327,6 +415,111 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
+
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+  * @brief  Function implementing the defaultTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartDefaultTask */
+void StartDefaultTask(void *argument)
+{
+  /* USER CODE BEGIN 5 */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_start_gcode_task */
+/**
+* @brief Function implementing the gcode_task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_start_gcode_task */
+void start_gcode_task(void *argument)
+{
+  /* USER CODE BEGIN start_gcode_task */
+  /* Infinite loop */
+  for(;;)
+  {
+	  for(int i=0; i < 32; i++){
+		  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);
+		  osDelay(2);
+	  }
+	  osDelay(20);
+  }
+  /* USER CODE END start_gcode_task */
+}
+
+/* USER CODE BEGIN Header_start_encoder_task */
+/**
+* @brief Function implementing the encoder_task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_start_encoder_task */
+void start_encoder_task(void *argument)
+{
+  /* USER CODE BEGIN start_encoder_task */
+  /* Infinite loop */
+  for(;;)
+  {
+	  if (AS5600_ReadRaw12(&raw))
+	  {
+		  printf("%u\r\n", raw);  // wypisz samą wartość surową
+	  }
+	  else
+	  {
+		  printf("error\r\n");
+	  }
+	  osDelay(10);
+  }
+  /* USER CODE END start_encoder_task */
+}
+
+/* USER CODE BEGIN Header_start_orzel_task */
+/**
+* @brief Function implementing the orzel_task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_start_orzel_task */
+void start_orzel_task(void *argument)
+{
+  /* USER CODE BEGIN start_orzel_task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END start_orzel_task */
+}
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM2 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM2) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.

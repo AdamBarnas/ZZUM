@@ -1,0 +1,5 @@
+G0 x10 F1000    (oś x i prędkość ruchu G0)
+G1 x20 F2000    (oś x i prędkość ruchu G1)
+G90 (współrzędne absolutne)
+G91 (współrzędne inkrementalne)
+G28 (home)
