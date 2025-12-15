@@ -22,5 +22,6 @@ extern I2C_HandleTypeDef hi2c3;
 bool AS5600_ReadRaw12(uint16_t *raw12);
 bool AS5600_ReadAngleRad(float *rad);
 bool AS5600_ReadAngleDeg(float *deg);
-
+int angle2enc(float deg);
+float raw2angle(uint16_t raw);
 #endif /* INC_AS5600_HAL_H_ */

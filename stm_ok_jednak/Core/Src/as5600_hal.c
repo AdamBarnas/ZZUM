@@ -23,3 +23,15 @@ bool AS5600_ReadRaw12(uint16_t *raw12)
     *raw12 = ((uint16_t)data[0] << 8 | data[1]) & 0x0FFF;
     return true;
 }
+
+int angle2enc(float angle_deg)
+{
+	int ret_val;
+	ret_val = (int)(angle_deg*4096/360)%4096;
+	return ret_val;
+}
+
+float raw2angle(uint16_t raw)
+{
+	return (float)(raw*360/4096.0);
+}
