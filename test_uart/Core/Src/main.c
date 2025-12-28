@@ -425,8 +425,8 @@ void Start_ENCODER_task(void const * argument)
   {
 	  if (AS5600_ReadRaw12(&raw))
 	  {
-//		  printf("%u\r\n", raw);  // wypisz samą wartość surową
-		  printf("%f\r\n", raw2angle(raw));
+		  printf("%u\r\n", raw);  // wypisz samą wartość surową
+//		  printf("%f\r\n", raw2angle(raw));
 	  }
 	  else
 	  {
