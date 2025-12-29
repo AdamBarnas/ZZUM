@@ -36,8 +36,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define DIR_CW 0
-#define DIR_CCW 1
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -469,18 +467,65 @@ void Start_STEPPER_task(void const * argument)
 
 	// INIT MOTOR
 	Stepper_Init(&motor);
-	Stepper_Enable(&motor);
-	Stepper_SetAcceleration(&motor, 300.0f, 300.0f);
-	Stepper_SetSpeed(&motor, 5000.0f);
-
 	// MOTOR TIMER
 	HAL_TIM_Base_Start_IT(&htim1);
+	Stepper_SetSpeed(&motor, 1000.0f);
+	Stepper_SetAcceleration(&motor, 10000.0f, 10000.0f);
+	raw = 5000;
+	osDelay(100);
+	Stepper_get_enc_pos(&motor, &raw);
+
+	Stepper_MoveTo(&motor, 0000);
+
+    while(motor.moving){
+	  osDelay(1);
+    }
+//	while(raw>12){
+//		if(raw > 20 && raw < 4000){
+//			Stepper_SetSpeed(&motor, 1000.0f);
+//			Stepper_Move(&motor, 64);
+//			Stepper_Start(&motor);
+//		}
+//		else{
+//			Stepper_SetSpeed(&motor, 1.0f);
+//			Stepper_Move(&motor, 2);
+//			Stepper_Start(&motor);
+//		}
+//		while(motor.moving){
+//		    osDelay(1);
+//		}
+//		Stepper_Stop(&motor);
+//		osDelay(20);
+//		printf("%u\r\n", raw);
+//	}
+//
+//	Stepper_Disable(&motor);
+//	motor.currPos = 0;
+
+	Stepper_SetSpeed(&motor, 1000.0f);
+	Stepper_Enable(&motor);
   for(;;)
   {
-	  Stepper_MoveTo(&motor, 1200);
-	  osDelay(5000);
+	  Stepper_MoveTo(&motor, FULL_REVOLUTION);
+	  while(motor.moving){
+		  osDelay(1);
+	  }
+	  osDelay(1000);
+	  printf("%u\r\n", raw);
 	  Stepper_MoveTo(&motor, 0000);
-	  osDelay(5000);
+	  while(motor.moving){
+		  osDelay(1);
+	  }
+	  osDelay(1000);
+	  printf("%u\r\n", raw);
+	  Stepper_MoveTo(&motor, -FULL_REVOLUTION);
+	  while(motor.moving){
+		  osDelay(1);
+	  }
+	  osDelay(1000);
+	  printf("%u\r\n", raw);
+	  osDelay(1000);
+
   }
   /* USER CODE END Start_STEPPER_task */
 }
@@ -496,18 +541,21 @@ void Start_ENCODER_task(void const * argument)
 {
   /* USER CODE BEGIN Start_ENCODER_task */
   /* Infinite loop */
+  int i = 0;
   for(;;)
   {
+//	  AS5600_ReadRaw12(&raw);
 	  if (AS5600_ReadRaw12(&raw))
 	  {
-		  printf("%u\r\n", raw);  // wypisz samą wartość surową
-//		  printf("%f\r\n", raw2angle(raw));
+//		  printf("%u\r\n", raw);  // wypisz samą wartość surową
+////		  printf("%f\r\n", raw2angle(raw));
+		  i = 1;
 	  }
 	  else
 	  {
 		  printf("error\r\n");
 	  }
-	  osDelay(200);
+	  osDelay(10);
   }
   /* USER CODE END Start_ENCODER_task */
 }

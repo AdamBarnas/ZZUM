@@ -3,6 +3,12 @@
 
 #include "stm32f4xx_hal.h"
 #include <stdint.h>
+#define ENG_STEP_COUNT 200
+#define MICROSTEP_COUNT 32
+#define FULL_REVOLUTION ENG_STEP_COUNT * MICROSTEP_COUNT
+#define DIR_CW 0
+#define DIR_CCW 1
+#define ENCODER_RESOLUTION 4096
 
 typedef struct {
 	// porty
@@ -29,10 +35,13 @@ typedef struct {
 void Stepper_Init(Stepper_t* m);
 void Stepper_Enable(Stepper_t* m);
 void Stepper_Disable(Stepper_t* m);
+void Stepper_Start(Stepper_t* m);
+void Stepper_Stop(Stepper_t* m);
 void Stepper_SetSpeed(Stepper_t* m, float speed);
 void Stepper_SetAcceleration(Stepper_t* m, float accel, float decel);
 void Stepper_MoveTo(Stepper_t* m, int32_t position);
 void Stepper_Move(Stepper_t* m, int32_t steps);
 void Stepper_Tick(Stepper_t* m);   // wywołuj w przerwaniu timera
+void Stepper_get_enc_pos(Stepper_t* m, uint16_t* raw);
 
 #endif

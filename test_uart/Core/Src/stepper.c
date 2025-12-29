@@ -27,6 +27,15 @@ void Stepper_Disable(Stepper_t* m)
     HAL_TIM_PWM_Stop_IT(m->htim, m->tim_channel);
 }
 
+void Stepper_Stop(Stepper_t* m)
+{
+	HAL_TIM_PWM_Stop_IT(m->htim, m->tim_channel);
+}
+
+void Stepper_Start(Stepper_t* m){
+	HAL_TIM_Base_Start_IT(m->htim);
+}
+
 // ustawienie aktualnej predkosci
 void Stepper_SetSpeed(Stepper_t* m, float speed) { m->maxSpeed = speed; }
 
@@ -97,4 +106,11 @@ void Stepper_Tick(Stepper_t* m)
     uint32_t arr = calcARR(m, m->currSpeed);
     __HAL_TIM_SET_AUTORELOAD(m->htim, arr);
     __HAL_TIM_SET_COMPARE(m->htim, m->tim_channel, arr / 2);
+}
+
+void Stepper_get_enc_pos(Stepper_t* m, uint16_t* raw)
+{
+	int32_t pos;
+	pos  = (int32_t)(*raw * FULL_REVOLUTION / ENCODER_RESOLUTION);
+	m->currPos = pos;
 }

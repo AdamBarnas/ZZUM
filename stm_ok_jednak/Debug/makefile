@@ -64,8 +64,8 @@ all: main-build
 main-build: zzum_ok.elf secondary-outputs
 
 # Tool invocations
-zzum_ok.elf zzum_ok.map: $(OBJS) $(USER_OBJS) F:\studia\ZZUM\stm_ok_jednak\STM32F401RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "zzum_ok.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"F:\studia\ZZUM\stm_ok_jednak\STM32F401RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="zzum_ok.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -Wl,--end-group
+zzum_ok.elf zzum_ok.map: $(OBJS) $(USER_OBJS) C:\Users\adamb\Documents\AiR\ S4\ZZUM\stm_ok_jednak\STM32F401RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "zzum_ok.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\adamb\Documents\AiR S4\ZZUM\stm_ok_jednak\STM32F401RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="zzum_ok.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
