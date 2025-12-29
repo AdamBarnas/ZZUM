@@ -26,6 +26,7 @@
 #include "stdlib.h"
 #include "string.h"
 #include "as5600_hal.h"
+#include "stepper.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,6 +48,8 @@
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c3;
 
+TIM_HandleTypeDef htim1;
+
 UART_HandleTypeDef huart2;
 
 osThreadId defaultTaskHandle;
@@ -61,6 +64,11 @@ int _write(int file, char *ptr, int len)
     HAL_UART_Transmit(&huart2, (uint8_t*)ptr, len, HAL_MAX_DELAY);
     return len;
 }
+
+TIM_HandleTypeDef htim1;
+Stepper_t motor;
+// INIT PORT
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -68,6 +76,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C3_Init(void);
+static void MX_TIM1_Init(void);
 void StartDefaultTask(void const * argument);
 void Start_UART_task(void const * argument);
 void Start_STEPPER_task(void const * argument);
@@ -112,6 +121,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_I2C3_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   printf("\rSTART\n\r");
   /* USER CODE END 2 */
@@ -251,6 +261,81 @@ static void MX_I2C3_Init(void)
 }
 
 /**
+  * @brief TIM1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM1_Init(void)
+{
+
+  /* USER CODE BEGIN TIM1_Init 0 */
+
+  /* USER CODE END TIM1_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
+
+  /* USER CODE BEGIN TIM1_Init 1 */
+
+  /* USER CODE END TIM1_Init 1 */
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 84;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 65535;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 32767;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_ENABLE;
+  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+  sBreakDeadTimeConfig.DeadTime = 0;
+  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+  if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM1_Init 2 */
+
+  /* USER CODE END TIM1_Init 2 */
+  HAL_TIM_MspPostInit(&htim1);
+
+}
+
+/**
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
@@ -300,24 +385,24 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LED_Pin|ENG_ENABLE_Pin|STEP_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LED_Pin|EN_X_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(DIR_X_GPIO_Port, DIR_X_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : LED_Pin ENG_ENABLE_Pin STEP_Pin */
-  GPIO_InitStruct.Pin = LED_Pin|ENG_ENABLE_Pin|STEP_Pin;
+  /*Configure GPIO pins : LED_Pin EN_X_Pin */
+  GPIO_InitStruct.Pin = LED_Pin|EN_X_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : DIR_Pin */
-  GPIO_InitStruct.Pin = DIR_Pin;
+  /*Configure GPIO pin : DIR_X_Pin */
+  GPIO_InitStruct.Pin = DIR_X_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(DIR_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(DIR_X_GPIO_Port, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
@@ -375,37 +460,27 @@ void Start_STEPPER_task(void const * argument)
 {
   /* USER CODE BEGIN Start_STEPPER_task */
   /* Infinite loop */
-	HAL_GPIO_WritePin(ENG_ENABLE_GPIO_Port, ENG_ENABLE_Pin, GPIO_PIN_RESET);
+	motor.DIR_Port  = GPIOB;
+	motor.DIR_Pin  = GPIO_PIN_4;
+	motor.EN_Port   = GPIOA;
+	motor.EN_Pin   = GPIO_PIN_9;
+	motor.htim      = &htim1;
+	motor.tim_channel = TIM_CHANNEL_3;
+
+	// INIT MOTOR
+	Stepper_Init(&motor);
+	Stepper_Enable(&motor);
+	Stepper_SetAcceleration(&motor, 300.0f, 300.0f);
+	Stepper_SetSpeed(&motor, 5000.0f);
+
+	// MOTOR TIMER
+	HAL_TIM_Base_Start_IT(&htim1);
   for(;;)
   {
-	HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, DIR_CW);
-	printf("CW\n\r");
-	osDelay(1000);
-	for(int s=0;s<200;s++)
-	{
-		for(int i=0;i<32;i++)
-		{
-			// One step
-			osDelay(2);
-			HAL_GPIO_TogglePin(STEP_GPIO_Port, STEP_Pin);
-			osDelay(2);
-			HAL_GPIO_TogglePin(STEP_GPIO_Port, STEP_Pin);
-		}
-	}
-	HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, DIR_CCW);
-	printf("CCW\n\r");
-	osDelay(1000);
-	for(int s=0;s<200;s++)
-	{
-		for(int i=0;i<32;i++)
-		{
-			// One step
-			osDelay(2);
-			HAL_GPIO_TogglePin(STEP_GPIO_Port, STEP_Pin);
-			osDelay(2);
-			HAL_GPIO_TogglePin(STEP_GPIO_Port, STEP_Pin);
-		}
-	}
+	  Stepper_MoveTo(&motor, 1200);
+	  osDelay(5000);
+	  Stepper_MoveTo(&motor, 0000);
+	  osDelay(5000);
   }
   /* USER CODE END Start_STEPPER_task */
 }
@@ -425,8 +500,8 @@ void Start_ENCODER_task(void const * argument)
   {
 	  if (AS5600_ReadRaw12(&raw))
 	  {
-//		  printf("%u\r\n", raw);  // wypisz samą wartość surową
-		  printf("%f\r\n", raw2angle(raw));
+		  printf("%u\r\n", raw);  // wypisz samą wartość surową
+//		  printf("%f\r\n", raw2angle(raw));
 	  }
 	  else
 	  {
@@ -454,7 +529,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-
+  if (htim == motor.htim) {
+	  Stepper_Tick(&motor);
+  }
   /* USER CODE END Callback 1 */
 }
 
