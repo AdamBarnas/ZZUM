@@ -5,7 +5,7 @@
 #include <stdint.h>
 #define ENG_STEP_COUNT 200
 #define MICROSTEP_COUNT 32
-#define FULL_REVOLUTION ENG_STEP_COUNT * MICROSTEP_COUNT
+#define FULL_REVOLUTION (ENG_STEP_COUNT * MICROSTEP_COUNT)
 #define DIR_CW 0
 #define DIR_CCW 1
 #define ENCODER_RESOLUTION 4096
@@ -28,14 +28,13 @@ typedef struct {
     float currSpeed;     // steps/s
     int32_t targetPos;   // cel (w krokach)
     int32_t currPos;     // aktualna pozycja (w krokach)
-    uint8_t moving;      // flaga ruchu
+    volatile uint8_t moving;      // flaga ruchu
     int8_t dir;          // +1 / -1
 } Stepper_t;
 
 void Stepper_Init(Stepper_t* m);
 void Stepper_Enable(Stepper_t* m);
 void Stepper_Disable(Stepper_t* m);
-void Stepper_Start(Stepper_t* m);
 void Stepper_Stop(Stepper_t* m);
 void Stepper_SetSpeed(Stepper_t* m, float speed);
 void Stepper_SetAcceleration(Stepper_t* m, float accel, float decel);

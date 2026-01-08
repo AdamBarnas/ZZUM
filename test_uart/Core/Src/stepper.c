@@ -32,10 +32,6 @@ void Stepper_Stop(Stepper_t* m)
 	HAL_TIM_PWM_Stop_IT(m->htim, m->tim_channel);
 }
 
-void Stepper_Start(Stepper_t* m){
-	HAL_TIM_Base_Start_IT(m->htim);
-}
-
 // ustawienie aktualnej predkosci
 void Stepper_SetSpeed(Stepper_t* m, float speed) { m->maxSpeed = speed; }
 
@@ -49,6 +45,9 @@ void Stepper_SetAcceleration(Stepper_t* m, float accel, float decel) {
 void Stepper_MoveTo(Stepper_t* m, int32_t position)
 {
     if (position == m->currPos) return;
+
+    if (m->currSpeed < 1.0f)
+        m->currSpeed = 1.0f;
 
     m->targetPos = position;
     m->moving = 1;
@@ -111,6 +110,10 @@ void Stepper_Tick(Stepper_t* m)
 void Stepper_get_enc_pos(Stepper_t* m, uint16_t* raw)
 {
 	int32_t pos;
-	pos  = (int32_t)(*raw * FULL_REVOLUTION / ENCODER_RESOLUTION);
+	int32_t old_pos = m->currPos;
+	int32_t revolutions = (old_pos - (old_pos%FULL_REVOLUTION));
+	if (old_pos%FULL_REVOLUTION < 0){revolutions -= FULL_REVOLUTION;}
+	pos = (int32_t)((float)(*raw) * FULL_REVOLUTION / ENCODER_RESOLUTION);
+	pos = pos + revolutions;
 	m->currPos = pos;
 }

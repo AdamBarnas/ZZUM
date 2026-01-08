@@ -3,10 +3,9 @@
 ../Core/Src/stepper.c:19:6:Stepper_Enable	16	static
 ../Core/Src/stepper.c:24:6:Stepper_Disable	16	static
 ../Core/Src/stepper.c:30:6:Stepper_Stop	16	static
-../Core/Src/stepper.c:35:6:Stepper_Start	16	static
-../Core/Src/stepper.c:40:6:Stepper_SetSpeed	16	static
-../Core/Src/stepper.c:43:6:Stepper_SetAcceleration	24	static
-../Core/Src/stepper.c:49:6:Stepper_MoveTo	24	static
-../Core/Src/stepper.c:71:6:Stepper_Move	16	static
-../Core/Src/stepper.c:77:6:Stepper_Tick	32	static
-../Core/Src/stepper.c:111:6:Stepper_get_enc_pos	24	static
+../Core/Src/stepper.c:36:6:Stepper_SetSpeed	16	static
+../Core/Src/stepper.c:39:6:Stepper_SetAcceleration	24	static
+../Core/Src/stepper.c:45:6:Stepper_MoveTo	24	static
+../Core/Src/stepper.c:70:6:Stepper_Move	16	static
+../Core/Src/stepper.c:76:6:Stepper_Tick	32	static
+../Core/Src/stepper.c:110:6:Stepper_get_enc_pos	32	static

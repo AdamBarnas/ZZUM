@@ -55,7 +55,8 @@ osThreadId UART_taskHandle;
 osThreadId STEPPER_taskHandle;
 osThreadId ENCODER_taskHandle;
 /* USER CODE BEGIN PV */
-uint16_t raw;
+volatile int16_t raw;
+volatile uint16_t hope;
 float angle;
 int _write(int file, char *ptr, int len)
 {
@@ -63,7 +64,6 @@ int _write(int file, char *ptr, int len)
     return len;
 }
 
-TIM_HandleTypeDef htim1;
 Stepper_t motor;
 // INIT PORT
 
@@ -81,6 +81,18 @@ void Start_STEPPER_task(void const * argument);
 void Start_ENCODER_task(void const * argument);
 
 /* USER CODE BEGIN PFP */
+void print_pos()
+{
+	hope = (int16_t)((float)motor.currPos)*ENCODER_RESOLUTION/FULL_REVOLUTION;
+	hope = hope%ENCODER_RESOLUTION;
+	if(hope < 0)
+	{
+		hope += ENCODER_RESOLUTION;
+	}
+	printf("                    enc %u\r", raw);
+	printf("          hope %u\r", hope);
+    printf("pos %ld\r\n", motor.currPos);
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -146,15 +158,15 @@ int main(void)
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of UART_task */
-  osThreadDef(UART_task, Start_UART_task, osPriorityIdle, 0, 128);
+  osThreadDef(UART_task, Start_UART_task, osPriorityNormal, 0, 128);
   UART_taskHandle = osThreadCreate(osThread(UART_task), NULL);
 
   /* definition and creation of STEPPER_task */
-  osThreadDef(STEPPER_task, Start_STEPPER_task, osPriorityIdle, 0, 128);
+  osThreadDef(STEPPER_task, Start_STEPPER_task, osPriorityHigh, 0, 128);
   STEPPER_taskHandle = osThreadCreate(osThread(STEPPER_task), NULL);
 
   /* definition and creation of ENCODER_task */
-  osThreadDef(ENCODER_task, Start_ENCODER_task, osPriorityIdle, 0, 128);
+  osThreadDef(ENCODER_task, Start_ENCODER_task, osPriorityNormal, 0, 128);
   ENCODER_taskHandle = osThreadCreate(osThread(ENCODER_task), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -407,7 +419,12 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim == motor.htim) {
+        Stepper_Tick(&motor);
+    }
+}
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -457,6 +474,38 @@ void Start_UART_task(void const * argument)
 void Start_STEPPER_task(void const * argument)
 {
   /* USER CODE BEGIN Start_STEPPER_task */
+
+	void wait_for_stop()
+	{
+		while(motor.moving){
+		  osDelay(10);
+		}
+	}
+
+	int32_t get_diff()
+	{
+		int32_t diff = (motor.targetPos - motor.currPos);
+		if(diff < 0){diff = -diff;}
+		return diff;
+	}
+
+	void goto_enc(int32_t target_pos)
+	{
+		motor.targetPos = target_pos;
+		Stepper_get_enc_pos(&motor, &raw);
+		int32_t diff = get_diff();
+		while(diff > 2)
+		{
+			print_pos();
+			Stepper_MoveTo(&motor, target_pos);
+			wait_for_stop();
+			print_pos();
+			Stepper_get_enc_pos(&motor, &raw);
+			print_pos();
+			diff = get_diff();
+		}
+	}
+
   /* Infinite loop */
 	motor.DIR_Port  = GPIOB;
 	motor.DIR_Pin  = GPIO_PIN_4;
@@ -470,60 +519,22 @@ void Start_STEPPER_task(void const * argument)
 	// MOTOR TIMER
 	HAL_TIM_Base_Start_IT(&htim1);
 	Stepper_SetSpeed(&motor, 1000.0f);
-	Stepper_SetAcceleration(&motor, 10000.0f, 10000.0f);
+	Stepper_SetAcceleration(&motor, 1000.0f, 1000.0f);
 	raw = 5000;
 	osDelay(100);
-	Stepper_get_enc_pos(&motor, &raw);
+	print_pos();
 
-	Stepper_MoveTo(&motor, 0000);
+	goto_enc(0);
 
-    while(motor.moving){
-	  osDelay(1);
-    }
-//	while(raw>12){
-//		if(raw > 20 && raw < 4000){
-//			Stepper_SetSpeed(&motor, 1000.0f);
-//			Stepper_Move(&motor, 64);
-//			Stepper_Start(&motor);
-//		}
-//		else{
-//			Stepper_SetSpeed(&motor, 1.0f);
-//			Stepper_Move(&motor, 2);
-//			Stepper_Start(&motor);
-//		}
-//		while(motor.moving){
-//		    osDelay(1);
-//		}
-//		Stepper_Stop(&motor);
-//		osDelay(20);
-//		printf("%u\r\n", raw);
-//	}
-//
-//	Stepper_Disable(&motor);
-//	motor.currPos = 0;
-
-	Stepper_SetSpeed(&motor, 1000.0f);
-	Stepper_Enable(&motor);
   for(;;)
   {
-	  Stepper_MoveTo(&motor, FULL_REVOLUTION);
-	  while(motor.moving){
-		  osDelay(1);
-	  }
+	  goto_enc(FULL_REVOLUTION*5/4);
 	  osDelay(1000);
-	  printf("%u\r\n", raw);
-	  Stepper_MoveTo(&motor, 0000);
-	  while(motor.moving){
-		  osDelay(1);
-	  }
+
+	  goto_enc(0);
 	  osDelay(1000);
-	  printf("%u\r\n", raw);
-	  Stepper_MoveTo(&motor, -FULL_REVOLUTION);
-	  while(motor.moving){
-		  osDelay(1);
-	  }
-	  osDelay(1000);
-	  printf("%u\r\n", raw);
+
+	  goto_enc(-FULL_REVOLUTION/8);
 	  osDelay(1000);
 
   }
@@ -577,9 +588,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-  if (htim == motor.htim) {
-	  Stepper_Tick(&motor);
-  }
+
   /* USER CODE END Callback 1 */
 }
 
