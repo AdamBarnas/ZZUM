@@ -1,6 +1,6 @@
 #include "stepper.h"
 #include <math.h>
-
+volatile int16_t rotations;
 static uint32_t calcARR(Stepper_t* m, float speed)
 {
     if (speed < 1.0f) speed = 1.0f;
@@ -111,9 +111,10 @@ void Stepper_get_enc_pos(Stepper_t* m, uint16_t* raw)
 {
 	int32_t pos;
 	int32_t old_pos = m->currPos;
-	int32_t revolutions = (old_pos - (old_pos%FULL_REVOLUTION));
-	if (old_pos%FULL_REVOLUTION < 0){revolutions -= FULL_REVOLUTION;}
+//	int32_t revolutions = (old_pos - (old_pos%FULL_REVOLUTION));
+//	if (old_pos%FULL_REVOLUTION < 0){revolutions -= FULL_REVOLUTION;}
 	pos = (int32_t)((float)(*raw) * FULL_REVOLUTION / ENCODER_RESOLUTION);
-	pos = pos + revolutions;
+//	pos = pos + revolutions;
+	pos = pos + (rotations * FULL_REVOLUTION);
 	m->currPos = pos;
 }

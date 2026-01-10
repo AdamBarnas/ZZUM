@@ -49,18 +49,21 @@ I2C_HandleTypeDef hi2c3;
 TIM_HandleTypeDef htim1;
 
 UART_HandleTypeDef huart2;
+UART_HandleTypeDef huart6;
 
 osThreadId defaultTaskHandle;
 osThreadId UART_taskHandle;
 osThreadId STEPPER_taskHandle;
 osThreadId ENCODER_taskHandle;
 /* USER CODE BEGIN PV */
-volatile int16_t raw;
+uint16_t raw;
 volatile uint16_t hope;
+extern volatile int16_t rotations;
 float angle;
+
 int _write(int file, char *ptr, int len)
 {
-    HAL_UART_Transmit(&huart2, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart6, (uint8_t*)ptr, len, HAL_MAX_DELAY);
     return len;
 }
 
@@ -75,12 +78,27 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C3_Init(void);
 static void MX_TIM1_Init(void);
+static void MX_USART6_UART_Init(void);
 void StartDefaultTask(void const * argument);
 void Start_UART_task(void const * argument);
 void Start_STEPPER_task(void const * argument);
 void Start_ENCODER_task(void const * argument);
 
 /* USER CODE BEGIN PFP */
+//void print_pos()
+//{
+//	hope = (int16_t)((float)motor.currPos)*ENCODER_RESOLUTION/FULL_REVOLUTION;
+//	hope = hope%ENCODER_RESOLUTION;
+//	if(hope < 0)
+//	{
+//		hope += ENCODER_RESOLUTION;
+//	}
+//	printf("                             rot %d\r", rotations);
+//	printf("                    enc %u\r", raw);
+//	printf("          hope %u\r", hope);
+//    printf("pos %ld\r\n", motor.currPos);
+//}
+
 void print_pos()
 {
 	hope = (int16_t)((float)motor.currPos)*ENCODER_RESOLUTION/FULL_REVOLUTION;
@@ -89,9 +107,10 @@ void print_pos()
 	{
 		hope += ENCODER_RESOLUTION;
 	}
-	printf("                    enc %u\r", raw);
-	printf("          hope %u\r", hope);
-    printf("pos %ld\r\n", motor.currPos);
+	printf("rot %d  ", rotations);
+	printf("enc %u  ", raw);
+	printf("hope %u  ", hope);
+    printf("pos %ld\n", motor.currPos);
 }
 /* USER CODE END PFP */
 
@@ -132,6 +151,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_I2C3_Init();
   MX_TIM1_Init();
+  MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
   printf("\rSTART\n\r");
   /* USER CODE END 2 */
@@ -379,6 +399,39 @@ static void MX_USART2_UART_Init(void)
 }
 
 /**
+  * @brief USART6 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART6_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART6_Init 0 */
+
+  /* USER CODE END USART6_Init 0 */
+
+  /* USER CODE BEGIN USART6_Init 1 */
+
+  /* USER CODE END USART6_Init 1 */
+  huart6.Instance = USART6;
+  huart6.Init.BaudRate = 115200;
+  huart6.Init.WordLength = UART_WORDLENGTH_8B;
+  huart6.Init.StopBits = UART_STOPBITS_1;
+  huart6.Init.Parity = UART_PARITY_NONE;
+  huart6.Init.Mode = UART_MODE_TX_RX;
+  huart6.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart6.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART6_Init 2 */
+
+  /* USER CODE END USART6_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -525,6 +578,7 @@ void Start_STEPPER_task(void const * argument)
 	print_pos();
 
 	goto_enc(0);
+	rotations = 0;
 
   for(;;)
   {
@@ -556,6 +610,7 @@ void Start_ENCODER_task(void const * argument)
   for(;;)
   {
 //	  AS5600_ReadRaw12(&raw);
+	  uint16_t old_raw = raw;
 	  if (AS5600_ReadRaw12(&raw))
 	  {
 //		  printf("%u\r\n", raw);  // wypisz samą wartość surową
@@ -565,6 +620,14 @@ void Start_ENCODER_task(void const * argument)
 	  else
 	  {
 		  printf("error\r\n");
+	  }
+	  if(raw < 1000 && old_raw > 3000)
+	  {
+		  rotations = rotations + 1;
+	  }
+	  if(old_raw < 1000 && raw > 3000)
+	  {
+		  rotations = rotations - 1;
 	  }
 	  osDelay(10);
   }
