@@ -49,8 +49,8 @@ void Stepper_MoveTo(Stepper_t* m, int32_t position)
 {
     if (position == m->currPos) return;
 
-    if (m->currSpeed < 1.0f)
-        m->currSpeed = 1.0f;
+    if (m->currSpeed < MIN_SPEED)
+        m->currSpeed = MIN_SPEED;
 
     m->targetPos = position;
     m->moving = 1;
@@ -93,12 +93,13 @@ void Stepper_Tick(Stepper_t* m)
     }
 
     float Sbrake = (m->currSpeed * m->currSpeed) / (2.0f * m->decel);
-
+    if (m->currSpeed < MIN_SPEED)
+		m->currSpeed = MIN_SPEED;
     if (Sbrake >= stepsRemaining) {
         // decelerate
         m->currSpeed -= (m->decel / m->currSpeed);
-        if (m->currSpeed < 1.0f)
-            m->currSpeed = 1.0f;
+        if (m->currSpeed < MIN_SPEED)
+            m->currSpeed = MIN_SPEED;
     } else if (m->currSpeed < m->maxSpeed) {
         // accelerate
         m->currSpeed += (m->accel / m->currSpeed);

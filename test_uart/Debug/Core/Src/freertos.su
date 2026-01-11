@@ -1,1 +1,12 @@
-../Core/Src/freertos.c:62:6:vApplicationGetIdleTaskMemory	24	static
+../Core/Src/freertos.c:79:6:print_pos	8	static
+../Core/Src/freertos.c:109:6:vApplicationGetIdleTaskMemory	24	static
+../Core/Src/freertos.c:123:6:MX_FREERTOS_Init	104	static
+../Core/Src/freertos.c:170:6:StartDefaultTask	16	static
+../Core/Src/freertos.c:191:7:wait_for_stop	16	static
+../Core/Src/freertos.c:188:6:Start_STEPPER_task	24	static
+../Core/Src/freertos.c:198:10:get_diff	24	static
+../Core/Src/freertos.c:205:7:goto_enc	32	static
+../Core/Src/freertos.c:222:7:process_gcode_line	56	static
+../Core/Src/freertos.c:370:6:Start_ENCODER_task	24	static
+../Core/Src/freertos.c:402:6:HAL_TIM_PWM_PulseFinishedCallback	16	static
+../Core/Src/freertos.c:409:6:HAL_UARTEx_RxEventCallback	16	static

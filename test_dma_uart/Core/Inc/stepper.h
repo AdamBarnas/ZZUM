@@ -9,6 +9,7 @@
 #define DIR_CW 0
 #define DIR_CCW 1
 #define ENCODER_RESOLUTION 4096
+#define MIN_SPEED 32.0f
 
 typedef struct {
 	// porty

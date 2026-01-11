@@ -8,4 +8,4 @@
 ../Core/Src/stepper.c:48:6:Stepper_MoveTo	24	static
 ../Core/Src/stepper.c:74:6:Stepper_Move	16	static
 ../Core/Src/stepper.c:80:6:Stepper_Tick	32	static
-../Core/Src/stepper.c:114:6:Stepper_get_enc_pos	24	static
+../Core/Src/stepper.c:115:6:Stepper_get_enc_pos	24	static

@@ -46,7 +46,9 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  C:/Users/adamb/STM32Cube/Repository/STM32Cube_FW_F4_V1.28.3/Middlewares/Third_Party/FreeRTOS/Source/include/queue.h \
  C:/Users/adamb/STM32Cube/Repository/STM32Cube_FW_F4_V1.28.3/Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h \
  C:/Users/adamb/STM32Cube/Repository/STM32Cube_FW_F4_V1.28.3/Middlewares/Third_Party/FreeRTOS/Source/include/timers.h \
- ../Core/Inc/as5600_hal.h ../Core/Inc/stepper.h
+ ../Core/Inc/dma.h ../Core/Inc/main.h ../Core/Inc/i2c.h ../Core/Inc/tim.h \
+ ../Core/Inc/usart.h ../Core/Inc/gpio.h ../Core/Inc/stepper.h \
+ ../Core/Inc/gcode_rx.h
 ../Core/Inc/main.h:
 C:/Users/adamb/STM32Cube/Repository/STM32Cube_FW_F4_V1.28.3/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -95,5 +97,11 @@ C:/Users/adamb/STM32Cube/Repository/STM32Cube_FW_F4_V1.28.3/Middlewares/Third_Pa
 C:/Users/adamb/STM32Cube/Repository/STM32Cube_FW_F4_V1.28.3/Middlewares/Third_Party/FreeRTOS/Source/include/queue.h:
 C:/Users/adamb/STM32Cube/Repository/STM32Cube_FW_F4_V1.28.3/Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h:
 C:/Users/adamb/STM32Cube/Repository/STM32Cube_FW_F4_V1.28.3/Middlewares/Third_Party/FreeRTOS/Source/include/timers.h:
-../Core/Inc/as5600_hal.h:
+../Core/Inc/dma.h:
+../Core/Inc/main.h:
+../Core/Inc/i2c.h:
+../Core/Inc/tim.h:
+../Core/Inc/usart.h:
+../Core/Inc/gpio.h:
 ../Core/Inc/stepper.h:
+../Core/Inc/gcode_rx.h:

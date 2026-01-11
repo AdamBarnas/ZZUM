@@ -62,6 +62,7 @@ float angle;
 
 static float current_x = 0.0f;
 static float feedrate = 1000.0f;
+static float acceleration = 1000.0f;      // mm/s^2 default
 static bool absolute_mode = true;  // G90 = true, G91 = false
 
 /* USER CODE END Variables */
@@ -80,10 +81,10 @@ void print_pos()
 	{
 		hope += ENCODER_RESOLUTION;
 	}
-	printf("rot %d  ", rotations);
-	printf("enc %u  ", raw);
-	printf("hope %u  ", hope);
-    printf("pos %d\n", curpos);
+//	printf("rot %d  ", rotations);
+//	printf("enc %u  ", raw);
+//	printf("hope %u  ", hope);
+//    printf("pos %d\n", curpos);
 }
 /* USER CODE END FunctionPrototypes */
 
@@ -237,10 +238,13 @@ void Start_Parser_task(void const * argument)
 	        return;
 
 	    int gcode = -1;
+	    int mcode = -1;
 	    bool has_x = false;
 	    bool has_f = false;
+	    bool has_s = false;
 	    float x_value = 0.0f;
 	    float f_value = 0.0f;
+	    float s_value = 0.0f;
 
 	    /* Token parsing */
 	    while (*p)
@@ -250,6 +254,11 @@ void Start_Parser_task(void const * argument)
 	            p++;
 	            gcode = strtol(p, &p, 10);
 	        }
+	        if (*p == 'M' || *p == 'm')
+			{
+				p++;
+				mcode = strtol(p, &p, 10);
+			}
 	        else if (*p == 'X' || *p == 'x')
 	        {
 	            p++;
@@ -261,6 +270,12 @@ void Start_Parser_task(void const * argument)
 	            p++;
 	            f_value = strtof(p, &p);
 	            has_f = true;
+	        }
+	        else if (*p == 'S' || *p == 's')
+	        {
+	            p++;
+	            s_value = strtof(p, &p);
+	            has_s = true;
 	        }
 	        else
 	        {
@@ -302,6 +317,20 @@ void Start_Parser_task(void const * argument)
 	        default:
 	            break;
 	    }
+
+	    switch (mcode)
+	    {
+	        case 204: /* M204 - Set acceleration */
+	            if (has_s && s_value > 0.0f)
+	            {
+	                acceleration = s_value;
+	                Stepper_SetAcceleration(&motor, acceleration, acceleration);
+	            }
+	            break;
+
+	        default:
+	        	break;
+	    }
 	}
 
 
@@ -337,7 +366,7 @@ void Start_Parser_task(void const * argument)
 	     if (c == '\n')
 	     {
 	        line[idx] = 0;
-	        HAL_UART_Transmit(&huart6, (uint8_t*)line, idx, HAL_MAX_DELAY);
+//	        HAL_UART_Transmit(&huart6, (uint8_t*)line, idx, HAL_MAX_DELAY);
 	        wait_for_stop();
 	        process_gcode_line(line);
 	        idx = 0;
@@ -384,7 +413,7 @@ void Start_Encoder_task(void const * argument)
 		  {
 			  printf("error\r\n");
 		  }
-		  osDelay(20);
+		  osDelay(10);
 	  }
   /* USER CODE END Start_Encoder_task */
 }

@@ -1,2 +1,4 @@
 ../Core/Src/as5600_hal.c:6:13:as5600_read	24	static
 ../Core/Src/as5600_hal.c:17:6:AS5600_ReadRaw12	24	static
+../Core/Src/as5600_hal.c:27:5:angle2enc	24	static
+../Core/Src/as5600_hal.c:34:7:raw2angle	16	static

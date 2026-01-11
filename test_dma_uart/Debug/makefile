@@ -64,8 +64,8 @@ all: main-build
 main-build: test_dma_uart.elf secondary-outputs
 
 # Tool invocations
-test_dma_uart.elf test_dma_uart.map: $(OBJS) $(USER_OBJS) C:\Users\adamb\STM32CubeIDE\workspace_1.16.0\test_dma_uart\STM32F401RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "test_dma_uart.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\adamb\STM32CubeIDE\workspace_1.16.0\test_dma_uart\STM32F401RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="test_dma_uart.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+test_dma_uart.elf test_dma_uart.map: $(OBJS) $(USER_OBJS) F:\studia\ZZUM\test_dma_uart\STM32F401RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "test_dma_uart.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"F:\studia\ZZUM\test_dma_uart\STM32F401RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="test_dma_uart.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
