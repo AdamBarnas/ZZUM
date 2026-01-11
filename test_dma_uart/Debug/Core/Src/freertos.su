@@ -1,0 +1,10 @@
+../Core/Src/freertos.c:74:6:print_pos	16	static
+../Core/Src/freertos.c:103:6:vApplicationGetIdleTaskMemory	24	static
+../Core/Src/freertos.c:117:6:MX_FREERTOS_Init	104	static
+../Core/Src/freertos.c:164:6:StartDefaultTask	16	static
+../Core/Src/freertos.c:190:7:wait_for_stop	16	static
+../Core/Src/freertos.c:182:6:Start_Parser_task	24	static
+../Core/Src/freertos.c:197:10:get_diff	24	static
+../Core/Src/freertos.c:204:7:goto_enc	32	static
+../Core/Src/freertos.c:221:7:process_gcode_line	56	static
+../Core/Src/freertos.c:362:6:Start_Encoder_task	24	static
