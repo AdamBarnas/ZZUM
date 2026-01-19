@@ -22,12 +22,14 @@ void Stepper_Init(Stepper_t* m)
 void Stepper_Enable(Stepper_t* m)
 {
     HAL_GPIO_WritePin(m->EN_Port, m->EN_Pin, GPIO_PIN_RESET);
+    m->powered = 1;
 }
 
 void Stepper_Disable(Stepper_t* m)
 {
     HAL_GPIO_WritePin(m->EN_Port, m->EN_Pin, GPIO_PIN_SET);
     HAL_TIM_PWM_Stop(m->htim, m->tim_channel);
+    m->powered = 0;
 }
 
 void Stepper_Stop(Stepper_t* m)
@@ -65,6 +67,9 @@ void Stepper_MoveTo(Stepper_t* m, int32_t position)
     uint32_t arr = calcARR(m, m->currSpeed);
     __HAL_TIM_SET_AUTORELOAD(m->htim, arr);
     __HAL_TIM_SET_COMPARE(m->htim, m->tim_channel, arr / 2);
+
+    if (m->powered == 0)
+    	Stepper_Enable(m);
 
     HAL_TIM_PWM_Start(m->htim, m->tim_channel);
     __HAL_TIM_MOE_ENABLE(m->htim);

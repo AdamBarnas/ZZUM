@@ -61,9 +61,13 @@ volatile uint16_t hope;
 float angle;
 
 static float current_x = 0.0f;
-static float feedrate = 1000.0f;
+static float feedrate0 = 1000.0f;
+static float feedrate1 = 1000.0f;
 static float acceleration = 1000.0f;      // mm/s^2 default
 static bool absolute_mode = true;  // G90 = true, G91 = false
+static float steps_per_mm = 6400.0/360.0f; // one mm <==> one deg
+static float inactivity_time = 0.0f; // inactivity time in seconds
+static uint32_t idle_time = 0;
 
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
@@ -283,19 +287,33 @@ void Start_Parser_task(void const * argument)
 	        }
 	    }
 
-	    /* Feedrate is modal */
-	    if (has_f && f_value > 0.0f)
-	        feedrate = f_value;
-
 	    switch (gcode)
 	    {
 	        case 0: /* G0 */
-	        case 1: /* G1 */
+	    	    /* Feedrate is modal */
+	    	    if (has_f && f_value > 0.0f)
+	    	        feedrate0 = f_value;
+
 	            if (has_x)
 	            {
-	                float target = absolute_mode ? x_value : (current_x + x_value);
+	                float target = absolute_mode ? x_value*steps_per_mm : (current_x + x_value*steps_per_mm);
 //	                motion_move_x(target, feedrate);
-	                Stepper_SetSpeed(&motor, feedrate);
+	                Stepper_SetSpeed(&motor, feedrate0);
+	                goto_enc((int32_t)target);
+	                current_x = target;
+	            }
+	            break;
+
+	        case 1: /* G1 */
+	    	    /* Feedrate is modal */
+	    	    if (has_f && f_value > 0.0f)
+	    	        feedrate1 = f_value;
+
+	            if (has_x)
+	            {
+	                float target = absolute_mode ? x_value*steps_per_mm : (current_x + x_value*steps_per_mm);
+//	                motion_move_x(target, feedrate);
+	                Stepper_SetSpeed(&motor, feedrate1);
 	                goto_enc((int32_t)target);
 	                current_x = target;
 	            }
@@ -320,6 +338,30 @@ void Start_Parser_task(void const * argument)
 
 	    switch (mcode)
 	    {
+			case 80: /* M80 power on*/
+				Stepper_Enable(&motor);
+				break;
+
+			case 81: /* M81 power on*/
+				Stepper_Disable(&motor);
+				break;
+
+			case 85: /* M85 inactivity shutdown period */
+				if (has_s && s_value >= 0.0f)
+				{
+					inactivity_time = s_value;
+				}
+				break;
+
+	    	case 92: /* M92 set steps per mm*/
+				if (has_x)
+				{
+					if (x_value < 1)
+						x_value = 1;
+					steps_per_mm = x_value;
+				}
+				break;
+
 	        case 204: /* M204 - Set acceleration */
 	            if (has_s && s_value > 0.0f)
 	            {
@@ -375,7 +417,18 @@ void Start_Parser_task(void const * argument)
 	     {
 	        line[idx++] = c;
 	     }
+	     idle_time = 0;
 	  }
+
+	  if (motor.moving == 0)
+	  {
+		  Stepper_get_enc_pos(&motor, &raw);
+		  int32_t idle_diff = get_diff();
+		  if (idle_diff < 0) idle_diff = -idle_diff;
+		  if (idle_diff > 5) goto_enc(current_x);
+	  }
+	  idle_time += 10;
+	  if (inactivity_time != 0 && (inactivity_time*1000) < idle_time) Stepper_Disable(&motor);
     osDelay(10);
   }
   /* USER CODE END Start_Parser_task */

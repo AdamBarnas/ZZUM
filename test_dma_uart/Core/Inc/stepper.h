@@ -30,6 +30,7 @@ typedef struct {
     int32_t targetPos;   // cel (w krokach)
     int32_t currPos;     // aktualna pozycja (w krokach)
     volatile uint8_t moving;      // flaga ruchu
+    volatile uint8_t powered;
     int8_t dir;          // +1 / -1
 } Stepper_t;
 
