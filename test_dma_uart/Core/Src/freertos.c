@@ -449,7 +449,11 @@ void Start_Parser_task(void const * argument)
 		  Stepper_get_enc_pos(&motor, &raw);
 		  int32_t idle_diff = get_diff();
 		  if (idle_diff < 0) idle_diff = -idle_diff;
-		  if (idle_diff > 5) goto_enc(current_x);
+		  if (idle_diff > 5)
+		  {
+			  goto_enc(current_x);
+			  idle_time = 0;
+		  }
 	  }
 	  idle_time += 10;
 	  if (inactivity_time != 0 && (inactivity_time*1000) < idle_time) Stepper_Disable(&motor);

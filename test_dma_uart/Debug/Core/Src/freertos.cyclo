@@ -8,4 +8,4 @@
 ../Core/Src/freertos.c:209:7:goto_enc	2
 ../Core/Src/freertos.c:226:7:demo	2
 ../Core/Src/freertos.c:244:7:process_gcode_line	50
-../Core/Src/freertos.c:468:6:Start_Encoder_task	6
+../Core/Src/freertos.c:472:6:Start_Encoder_task	6
