@@ -6,5 +6,6 @@
 ../Core/Src/freertos.c:187:6:Start_Parser_task	32	static
 ../Core/Src/freertos.c:202:10:get_diff	24	static
 ../Core/Src/freertos.c:209:7:goto_enc	32	static
-../Core/Src/freertos.c:226:7:process_gcode_line	64	static
-../Core/Src/freertos.c:444:6:Start_Encoder_task	24	static
+../Core/Src/freertos.c:226:7:demo	32	static
+../Core/Src/freertos.c:244:7:process_gcode_line	64	static
+../Core/Src/freertos.c:468:6:Start_Encoder_task	24	static

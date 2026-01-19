@@ -223,6 +223,24 @@ void Start_Parser_task(void const * argument)
 		}
 	}
 
+	void demo()
+	{
+		Stepper_SetSpeed(&motor, 10000);
+		Stepper_SetAcceleration(&motor, 200000, 200000);
+		int32_t demo_pos = 800;
+		for (int i = 0; i < 8; i++)
+		{
+			goto_enc(demo_pos*(i+1));
+			osDelay(200);
+		}
+		goto_enc(0);
+		osDelay(200);
+		Stepper_SetSpeed(&motor, 50000);
+		goto_enc(64000);
+		osDelay(200);
+		goto_enc(0);
+	}
+
 	void process_gcode_line(char *line)
 	{
 	    char *p = line;
@@ -235,6 +253,12 @@ void Start_Parser_task(void const * argument)
 	            *c = '\0';
 	            break;
 	        }
+	    }
+
+	    if (*p == 'D' && *(p+1) == 'E' && *(p+2) == 'M' && *(p+3) == 'O')
+	    {
+	    	demo();
+	    	return;
 	    }
 
 	    while (isspace((unsigned char)*p)) p++;
